@@ -35,10 +35,19 @@ async def forward_signal(event):
     except Exception as e:
         print(f"❌ Error forwarding: {e}")
 
-print("🚀 Starting real-time signal forwarder...")
-print(f"📤 Source: {SOURCE_CHANNEL_ID}")
-print(f"📥 Target 1 (Real-time): {TARGET_GROUP_ID}")
-print("=" * 50)
+async def main():
+    print("🚀 Starting real-time signal forwarder...")
+    print(f"📤 Source: {SOURCE_CHANNEL_ID}")
+    print(f"📥 Target 1 (Real-time): {TARGET_GROUP_ID}")
+    print("=" * 50)
+    
+    try:
+        await client.start()
+        print("✅ Bot started successfully!")
+        await client.run_until_disconnected()
+    except Exception as e:
+        print(f"❌ Error starting bot: {e}")
+        print("💡 Try deleting forwarder.session file and run again")
 
-client.start()
-client.run_until_disconnected() 
+if __name__ == "__main__":
+    asyncio.run(main()) 
