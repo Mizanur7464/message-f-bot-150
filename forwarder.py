@@ -16,8 +16,8 @@ TARGET_GROUP_ID = -1002711701479   # ডেমো গ্রুপের আই�
 @client.on(events.NewMessage(chats=SOURCE_CHANNEL_ID))
 async def forward_signal(event):
     try:
-        # ১ মিনিট (৬০ সেকেন্ড) অপেক্ষা করুন
-        await asyncio.sleep(60)
+        # ২৫ সেকেন্ড অপেক্ষা করুন
+        await asyncio.sleep(25)
         text = event.message.text or ""
         # URL রিপ্লেস করা হবে না - অরিজিনাল টেক্সট রাখা হবে
         if event.message.media:
