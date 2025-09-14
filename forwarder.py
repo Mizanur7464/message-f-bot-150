@@ -3,8 +3,8 @@ from telethon import TelegramClient, events
 from telethon.tl.types import MessageMediaWebPage
 
 # === এখানে আপনার তথ্য বসান ===
-api_id = 24607929 # আপনার my.telegram.org থেকে পাওয়া API ID
-api_hash = '6d7028e6aec86b06e4524439c4a8394b'  # আপনার API HASH
+api_id = 20292708 # আপনার my.telegram.org থেকে পাওয়া API ID
+api_hash = '715f27fbac8184833ef22e4132cca65a'  # আপনার API HASH
 
 client = TelegramClient('forwarder.session', api_id, api_hash)
 
