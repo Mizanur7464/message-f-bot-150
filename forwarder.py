@@ -26,12 +26,15 @@ async def forward_signal(event):
         
         if event.message.media:
             # Check if it's a WebPage media (can't be forwarded as file)
-            if isinstance(event.message.media, MessageMediaWebPage):
+            media_type = type(event.message.media).__name__
+            print(f"🔍 Media type detected: {media_type}")
+            
+            if isinstance(event.message.media, MessageMediaWebPage) or 'WebPage' in media_type:
                 # For WebPage media, just forward the text with reply_markup
                 await client.send_message(TARGET_GROUP_ID, text, reply_markup=reply_markup)
                 print(f"✅ Real-time forwarded webpage message {event.message.id} to {TARGET_GROUP_ID}")
             else:
-                # For other media types, forward as file
+                # For other media types, try to forward as file
                 try:
                     await client.send_file(
                         TARGET_GROUP_ID,
