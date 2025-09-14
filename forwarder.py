@@ -20,15 +20,19 @@ async def forward_signal(event):
         await asyncio.sleep(25)
         text = event.message.text or ""
         # URL রিপ্লেস করা হবে না - অরিজিনাল টেক্সট রাখা হবে
+        # ইনলাইন বাটন ক্যাপচার করুন
+        reply_markup = event.message.reply_markup
+        
         if event.message.media:
             await client.send_file(
                 TARGET_GROUP_ID,
                 file=event.message.media,
-                caption=text
+                caption=text,
+                reply_markup=reply_markup
             )
             print(f"✅ Real-time forwarded media message {event.message.id} to {TARGET_GROUP_ID}")
         elif text:
-            await client.send_message(TARGET_GROUP_ID, text)
+            await client.send_message(TARGET_GROUP_ID, text, reply_markup=reply_markup)
             print(f"✅ Real-time forwarded text message {event.message.id} to {TARGET_GROUP_ID}")
         else:
             print(f"⚠️ Unknown message type: {event.message.id}")
