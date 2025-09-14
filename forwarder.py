@@ -20,39 +20,15 @@ async def forward_signal(event):
         # ২৫ সেকেন্ড অপেক্ষা করুন
         await asyncio.sleep(25)
         text = event.message.text or ""
-        # URL রিপ্লেস করা হবে না - অরিজিনাল টেক্সট রাখা হবে
-        # ইনলাইন বাটন ক্যাপচার করুন
         reply_markup = event.message.reply_markup
         
-        if event.message.media:
-            # Check if it's a WebPage media (can't be forwarded as file)
-            media_type = type(event.message.media).__name__
-            print(f"🔍 Media type detected: {media_type}")
-            
-            if isinstance(event.message.media, MessageMediaWebPage) or 'WebPage' in media_type:
-                # For WebPage media, just forward the text with reply_markup
-                await client.send_message(TARGET_GROUP_ID, text, reply_markup=reply_markup)
-                print(f"✅ Real-time forwarded webpage message {event.message.id} to {TARGET_GROUP_ID}")
-            else:
-                # For other media types, try to forward as file
-                try:
-                    await client.send_file(
-                        TARGET_GROUP_ID,
-                        file=event.message.media,
-                        caption=text,
-                        reply_markup=reply_markup
-                    )
-                    print(f"✅ Real-time forwarded media message {event.message.id} to {TARGET_GROUP_ID}")
-                except Exception as media_error:
-                    # If media forwarding fails, try to forward as text
-                    print(f"⚠️ Media forwarding failed, trying as text: {media_error}")
-                    await client.send_message(TARGET_GROUP_ID, text, reply_markup=reply_markup)
-                    print(f"✅ Real-time forwarded as text message {event.message.id} to {TARGET_GROUP_ID}")
-        elif text:
+        # সবসময় text message হিসেবে forward করো - এটাই সবচেয়ে safe
+        if text or reply_markup:
             await client.send_message(TARGET_GROUP_ID, text, reply_markup=reply_markup)
-            print(f"✅ Real-time forwarded text message {event.message.id} to {TARGET_GROUP_ID}")
+            print(f"✅ Real-time forwarded message {event.message.id} to {TARGET_GROUP_ID}")
         else:
-            print(f"⚠️ Unknown message type: {event.message.id}")
+            print(f"⚠️ Empty message: {event.message.id}")
+            
     except Exception as e:
         print(f"❌ Error forwarding: {e}")
 
