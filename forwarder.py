@@ -1,5 +1,6 @@
 import asyncio
 from telethon import TelegramClient, events
+from telethon.tl.types import MessageMediaWebPage
 
 # === এখানে আপনার তথ্য বসান ===
 api_id = 24607929 # আপনার my.telegram.org থেকে পাওয়া API ID
@@ -24,13 +25,26 @@ async def forward_signal(event):
         reply_markup = event.message.reply_markup
         
         if event.message.media:
-            await client.send_file(
-                TARGET_GROUP_ID,
-                file=event.message.media,
-                caption=text,
-                reply_markup=reply_markup
-            )
-            print(f"✅ Real-time forwarded media message {event.message.id} to {TARGET_GROUP_ID}")
+            # Check if it's a WebPage media (can't be forwarded as file)
+            if isinstance(event.message.media, MessageMediaWebPage):
+                # For WebPage media, just forward the text with reply_markup
+                await client.send_message(TARGET_GROUP_ID, text, reply_markup=reply_markup)
+                print(f"✅ Real-time forwarded webpage message {event.message.id} to {TARGET_GROUP_ID}")
+            else:
+                # For other media types, forward as file
+                try:
+                    await client.send_file(
+                        TARGET_GROUP_ID,
+                        file=event.message.media,
+                        caption=text,
+                        reply_markup=reply_markup
+                    )
+                    print(f"✅ Real-time forwarded media message {event.message.id} to {TARGET_GROUP_ID}")
+                except Exception as media_error:
+                    # If media forwarding fails, try to forward as text
+                    print(f"⚠️ Media forwarding failed, trying as text: {media_error}")
+                    await client.send_message(TARGET_GROUP_ID, text, reply_markup=reply_markup)
+                    print(f"✅ Real-time forwarded as text message {event.message.id} to {TARGET_GROUP_ID}")
         elif text:
             await client.send_message(TARGET_GROUP_ID, text, reply_markup=reply_markup)
             print(f"✅ Real-time forwarded text message {event.message.id} to {TARGET_GROUP_ID}")
