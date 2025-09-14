@@ -19,15 +19,36 @@ async def forward_signal(event):
     try:
         # ২৫ সেকেন্ড অপেক্ষা করুন
         await asyncio.sleep(25)
-        text = event.message.text or ""
-        reply_markup = event.message.reply_markup
         
-        # সবসময় text message হিসেবে forward করো - এটাই সবচেয়ে safe
-        if text or reply_markup:
-            await client.send_message(TARGET_GROUP_ID, text, reply_markup=reply_markup)
-            print(f"✅ Real-time forwarded message {event.message.id} to {TARGET_GROUP_ID}")
+        # সব ধরনের মেসেজ forward করার জন্য
+        if event.message.media:
+            # Media সহ মেসেজ
+            try:
+                # প্রথমে media হিসেবে forward করার চেষ্টা করো
+                await client.send_file(
+                    TARGET_GROUP_ID,
+                    file=event.message.media,
+                    caption=event.message.text or "",
+                    reply_markup=event.message.reply_markup
+                )
+                print(f"✅ Real-time forwarded media message {event.message.id} to {TARGET_GROUP_ID}")
+            except Exception as media_error:
+                # Media forward করতে না পারলে text হিসেবে forward করো
+                print(f"⚠️ Media failed, forwarding as text: {media_error}")
+                await client.send_message(
+                    TARGET_GROUP_ID, 
+                    event.message.text or "", 
+                    reply_markup=event.message.reply_markup
+                )
+                print(f"✅ Real-time forwarded as text message {event.message.id} to {TARGET_GROUP_ID}")
         else:
-            print(f"⚠️ Empty message: {event.message.id}")
+            # শুধু text মেসেজ
+            await client.send_message(
+                TARGET_GROUP_ID, 
+                event.message.text or "", 
+                reply_markup=event.message.reply_markup
+            )
+            print(f"✅ Real-time forwarded text message {event.message.id} to {TARGET_GROUP_ID}")
             
     except Exception as e:
         print(f"❌ Error forwarding: {e}")
