@@ -32,8 +32,7 @@ async def forward_signal(event):
                 try:
                     await client.send_message(
                         TARGET_GROUP_ID, 
-                        event.message.text or "", 
-                        reply_markup=event.message.reply_markup
+                        event.message.text or ""
                     )
                     print(f"✅ Real-time forwarded webpage message {event.message.id} to {TARGET_GROUP_ID}")
                     message_sent = True
@@ -56,8 +55,7 @@ async def forward_signal(event):
                     try:
                         await client.send_message(
                             TARGET_GROUP_ID, 
-                            event.message.text or "", 
-                            reply_markup=event.message.reply_markup
+                            event.message.text or ""
                         )
                         print(f"✅ Real-time forwarded as text message {event.message.id} to {TARGET_GROUP_ID}")
                         message_sent = True
@@ -69,8 +67,7 @@ async def forward_signal(event):
             try:
                 await client.send_message(
                     TARGET_GROUP_ID, 
-                    event.message.text or "📨 Message forwarded", 
-                    reply_markup=event.message.reply_markup
+                    event.message.text or "📨 Message forwarded"
                 )
                 print(f"✅ Real-time forwarded text message {event.message.id} to {TARGET_GROUP_ID}")
                 message_sent = True
