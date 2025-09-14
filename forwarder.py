@@ -17,10 +17,12 @@ TARGET_GROUP_ID = -1002711701479   # ডেমো গ্রুপের আই�
 @client.on(events.NewMessage(chats=SOURCE_CHANNEL_ID))
 async def forward_signal(event):
     try:
-        # ২৫ সেকেন্ড অপেক্ষা করুন
-        await asyncio.sleep(25)
+        # ৫ সেকেন্ড অপেক্ষা করুন
+        await asyncio.sleep(5)
         
-        # সব ধরনের মেসেজ forward করার জন্য
+        # সব ধরনের মেসেজ forward করার জন্য - নিশ্চিত করছি প্রতিটি মেসেজ সেন্ড হবে
+        message_sent = False
+        
         if event.message.media:
             # Media সহ মেসেজ
             try:
@@ -32,23 +34,39 @@ async def forward_signal(event):
                     reply_markup=event.message.reply_markup
                 )
                 print(f"✅ Real-time forwarded media message {event.message.id} to {TARGET_GROUP_ID}")
+                message_sent = True
             except Exception as media_error:
                 # Media forward করতে না পারলে text হিসেবে forward করো
                 print(f"⚠️ Media failed, forwarding as text: {media_error}")
+                try:
+                    await client.send_message(
+                        TARGET_GROUP_ID, 
+                        event.message.text or "", 
+                        reply_markup=event.message.reply_markup
+                    )
+                    print(f"✅ Real-time forwarded as text message {event.message.id} to {TARGET_GROUP_ID}")
+                    message_sent = True
+                except Exception as text_error:
+                    print(f"❌ Text forwarding also failed: {text_error}")
+        
+        if not message_sent:
+            # যদি media না থাকে বা media/text forwarding fail হয়
+            try:
                 await client.send_message(
                     TARGET_GROUP_ID, 
-                    event.message.text or "", 
+                    event.message.text or "📨 Message forwarded", 
                     reply_markup=event.message.reply_markup
                 )
-                print(f"✅ Real-time forwarded as text message {event.message.id} to {TARGET_GROUP_ID}")
-        else:
-            # শুধু text মেসেজ
-            await client.send_message(
-                TARGET_GROUP_ID, 
-                event.message.text or "", 
-                reply_markup=event.message.reply_markup
-            )
-            print(f"✅ Real-time forwarded text message {event.message.id} to {TARGET_GROUP_ID}")
+                print(f"✅ Real-time forwarded text message {event.message.id} to {TARGET_GROUP_ID}")
+                message_sent = True
+            except Exception as final_error:
+                print(f"❌ All forwarding methods failed: {final_error}")
+                # শেষ চেষ্টা - শুধু message ID পাঠাও
+                try:
+                    await client.send_message(TARGET_GROUP_ID, f"📨 Message {event.message.id} received but couldn't forward")
+                    print(f"✅ Sent notification for message {event.message.id}")
+                except:
+                    print(f"❌ Complete failure for message {event.message.id}")
             
     except Exception as e:
         print(f"❌ Error forwarding: {e}")
