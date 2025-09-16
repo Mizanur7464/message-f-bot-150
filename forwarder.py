@@ -32,7 +32,8 @@ async def forward_signal(event):
                 try:
                     await client.send_message(
                         TARGET_GROUP_ID, 
-                        event.message.text or ""
+                        event.message.text or "",
+                        reply_markup=event.message.reply_markup
                     )
                     print(f"✅ Real-time forwarded webpage message {event.message.id} to {TARGET_GROUP_ID}")
                     message_sent = True
@@ -55,7 +56,8 @@ async def forward_signal(event):
                     try:
                         await client.send_message(
                             TARGET_GROUP_ID, 
-                            event.message.text or ""
+                            event.message.text or "",
+                            reply_markup=event.message.reply_markup
                         )
                         print(f"✅ Real-time forwarded as text message {event.message.id} to {TARGET_GROUP_ID}")
                         message_sent = True
@@ -67,7 +69,8 @@ async def forward_signal(event):
             try:
                 await client.send_message(
                     TARGET_GROUP_ID, 
-                    event.message.text or "📨 Message forwarded"
+                    event.message.text or "📨 Message forwarded",
+                    reply_markup=event.message.reply_markup
                 )
                 print(f"✅ Real-time forwarded text message {event.message.id} to {TARGET_GROUP_ID}")
                 message_sent = True
@@ -75,7 +78,11 @@ async def forward_signal(event):
                 print(f"❌ All forwarding methods failed: {final_error}")
                 # শেষ চেষ্টা - শুধু message ID পাঠাও
                 try:
-                    await client.send_message(TARGET_GROUP_ID, f"📨 Message {event.message.id} received but couldn't forward")
+                    await client.send_message(
+                        TARGET_GROUP_ID, 
+                        f"📨 Message {event.message.id} received but couldn't forward",
+                        reply_markup=event.message.reply_markup
+                    )
                     print(f"✅ Sent notification for message {event.message.id}")
                 except:
                     print(f"❌ Complete failure for message {event.message.id}")
