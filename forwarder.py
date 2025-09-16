@@ -28,17 +28,28 @@ async def forward_signal(event):
             media_type = type(event.message.media).__name__
             
             if 'WebPage' in media_type:
-                # WebPage media - শুধু text হিসেবে forward করো
+                # WebPage media - file হিসেবে forward করো ইনলাইন বাটনের জন্য
                 try:
-                    await client.send_message(
-                        TARGET_GROUP_ID, 
-                        event.message.text or "",
+                    await client.send_file(
+                        TARGET_GROUP_ID,
+                        file=event.message.media,
+                        caption=event.message.text or "",
                         reply_markup=event.message.reply_markup
                     )
                     print(f"✅ Real-time forwarded webpage message {event.message.id} to {TARGET_GROUP_ID}")
                     message_sent = True
-                except Exception as text_error:
-                    print(f"❌ Webpage text forwarding failed: {text_error}")
+                except Exception as webpage_error:
+                    # WebPage file forward করতে না পারলে text হিসেবে forward করো
+                    print(f"⚠️ Webpage file failed, forwarding as text: {webpage_error}")
+                    try:
+                        await client.send_message(
+                            TARGET_GROUP_ID, 
+                            event.message.text or ""
+                        )
+                        print(f"✅ Real-time forwarded webpage as text message {event.message.id} to {TARGET_GROUP_ID}")
+                        message_sent = True
+                    except Exception as text_error:
+                        print(f"❌ Webpage text forwarding failed: {text_error}")
             else:
                 # অন্য media - file হিসেবে forward করার চেষ্টা করো
                 try:
@@ -56,8 +67,7 @@ async def forward_signal(event):
                     try:
                         await client.send_message(
                             TARGET_GROUP_ID, 
-                            event.message.text or "",
-                            reply_markup=event.message.reply_markup
+                            event.message.text or ""
                         )
                         print(f"✅ Real-time forwarded as text message {event.message.id} to {TARGET_GROUP_ID}")
                         message_sent = True
@@ -66,22 +76,34 @@ async def forward_signal(event):
         
         if not message_sent:
             # যদি media না থাকে বা media/text forwarding fail হয়
+            # ইনলাইন বাটনের জন্য text message কে file হিসেবে forward করার চেষ্টা করো
             try:
-                await client.send_message(
-                    TARGET_GROUP_ID, 
-                    event.message.text or "📨 Message forwarded",
-                    reply_markup=event.message.reply_markup
-                )
-                print(f"✅ Real-time forwarded text message {event.message.id} to {TARGET_GROUP_ID}")
-                message_sent = True
+                # Text message কে file হিসেবে forward করার চেষ্টা
+                if event.message.reply_markup:
+                    # যদি ইনলাইন বাটন থাকে তাহলে file হিসেবে forward করো
+                    await client.send_file(
+                        TARGET_GROUP_ID,
+                        file=None,  # No media file
+                        caption=event.message.text or "📨 Message forwarded",
+                        reply_markup=event.message.reply_markup
+                    )
+                    print(f"✅ Real-time forwarded text with buttons {event.message.id} to {TARGET_GROUP_ID}")
+                    message_sent = True
+                else:
+                    # যদি ইনলাইন বাটন না থাকে তাহলে সাধারণ text forward করো
+                    await client.send_message(
+                        TARGET_GROUP_ID, 
+                        event.message.text or "📨 Message forwarded"
+                    )
+                    print(f"✅ Real-time forwarded text message {event.message.id} to {TARGET_GROUP_ID}")
+                    message_sent = True
             except Exception as final_error:
                 print(f"❌ All forwarding methods failed: {final_error}")
                 # শেষ চেষ্টা - শুধু message ID পাঠাও
                 try:
                     await client.send_message(
                         TARGET_GROUP_ID, 
-                        f"📨 Message {event.message.id} received but couldn't forward",
-                        reply_markup=event.message.reply_markup
+                        f"📨 Message {event.message.id} received but couldn't forward"
                     )
                     print(f"✅ Sent notification for message {event.message.id}")
                 except:
